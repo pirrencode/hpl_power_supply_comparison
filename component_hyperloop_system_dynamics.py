@@ -1,8 +1,6 @@
-# Hyperloop power-supply system-dynamics simulation for route_a, route_b and route_c
-# Paste this complete script into ONE Jupyter Notebook cell.
-# Required file in the same directory: input.csv only.
-# The same input.csv contains route, station, scenario and daily weather records.
-# The script automatically infers whether the input contains 365 or 10 days.
+# -----------------------------------------------------------------------------
+# Author: Aleksejs Vesjolijs
+# -----------------------------------------------------------------------------
 
 import math
 from pathlib import Path
@@ -19,9 +17,6 @@ SUMMARY_FILE = "annual_route_scenario_summary.csv"
 SCENARIOS = ["solar", "nuclear", "fusion"]
 ROUTE_ORDER = ["route_a", "route_b", "route_c"]
 
-# -----------------------------------------------------------------------------
-# 1. Read and validate the route-aware input dataset
-# -----------------------------------------------------------------------------
 input_path = Path(INPUT_FILE)
 if not input_path.exists():
     raise FileNotFoundError(
@@ -201,9 +196,6 @@ route_ids += sorted(set(segments_by_route).difference(route_ids))
 if len(route_ids) < 2:
     raise ValueError("At least two routes are required for route comparison.")
 
-# -----------------------------------------------------------------------------
-# 2. Sampling and financial helpers
-# -----------------------------------------------------------------------------
 def beta_pert_sample(spec, rng, size=None, lam=4.0):
     fixed = spec.get("fixed", np.nan)
     if not pd.isna(fixed):
@@ -309,9 +301,6 @@ weather_lookup = {
     if row.route_id in route_ids
 }
 
-# -----------------------------------------------------------------------------
-# 3. Metrics stored for each route and scenario
-# -----------------------------------------------------------------------------
 daily_metric_names = [
     "planned_pod_cycles", "completed_pod_cycles", "passengers_served",
     "passenger_km", "travel_time_hours_per_full_route",
@@ -357,9 +346,6 @@ all_output_rows = []
 annual_summary_rows = []
 rng_master = np.random.default_rng(random_seed)
 
-# -----------------------------------------------------------------------------
-# 4. Simulate each route under the same three electricity scenarios
-# -----------------------------------------------------------------------------
 for route_number, route_id in enumerate(route_ids):
     metadata = route_metadata.get(route_id, {})
     route_name = route_id
@@ -628,9 +614,6 @@ for route_number, route_id in enumerate(route_ids):
                 "on_time_departure_ratio_sum": np.zeros(n_stations),
             }
 
-            # Planned outage duration is specified as days per year. Scale it
-            # to the actual simulation horizon so that a 10-day input does not
-            # incorrectly apply a 20-day annual outage to every simulated day.
             planned_outage_days = int(round(
                 sp.get("planned_outage_days_per_year", 0.0)
                 * simulation_days / 365.0
@@ -737,10 +720,6 @@ for route_number, route_id in enumerate(route_ids):
                 sunny_day_indicator = np.nan
                 sunny_day_share = np.nan
 
-                # Power-supply dispatch. The external daily weather profile replaces
-                # the previous internal seasonal/monsoon approximation. Solar output is
-                # strongly weather-dependent, while nuclear and fusion use coefficients
-                # close to unity.
                 if scenario == "solar":
                     sunny_day_share = route_sunny_share
                     sunny_day_indicator = 1.0 if weather_generation_coefficient >= 1.0 else 0.0
@@ -942,13 +921,6 @@ for route_number, route_id in enumerate(route_ids):
                 else:
                     total_generation = generation_by_station.sum() + grid_export_by_station.sum()
 
-                # Realised capacity factor is defined consistently for all three
-                # technologies as net electrical generation divided by the
-                # maximum energy obtainable from the installed/contracted
-                # nameplate capacity during the day. For nuclear and fusion it
-                # therefore reflects availability, outages and internal plant
-                # consumption; for solar it reflects the weather-adjusted PV
-                # output.
                 capacity_factor_realised = safe_divide(
                     total_generation, generation_capacity_mw * 24.0
                 )
@@ -1432,9 +1404,6 @@ if len(comparison_route_ids) >= 2:
         comparison_rows.append(row)
         all_output_rows.append(row)
 
-# -----------------------------------------------------------------------------
-# 7. Write output files
-# -----------------------------------------------------------------------------
 output = pd.DataFrame(all_output_rows)
 id_columns = [
     "period_type", "time_period", "weather_profile_id", "weather_season",

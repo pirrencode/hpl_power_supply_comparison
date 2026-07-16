@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Create route-wise Hyperloop power-supply comparison charts from output.csv.
+"""Route-wise Hyperloop power-supply comparison charts from output.csv.
+
+Author: Aleksejs Vesjolijs
 
 Usage:
     python hpl_visualizations.py
@@ -49,9 +51,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", default="hpl_visualizations", help="Directory for PNG files")
     parser.add_argument("--dpi", type=int, default=300, help="PNG resolution")
 
-    # Jupyter/IPython injects its own command-line arguments, including
-    # ``-f <kernel.json>``. parse_known_args() accepts the script's arguments
-    # and safely ignores those unrelated kernel arguments.
     args, unknown_args = parser.parse_known_args()
     if unknown_args:
         print(f"Ignoring Jupyter/IPython arguments: {unknown_args}")

@@ -1,5 +1,7 @@
 """
-Create four assessment tables from Hyperloop simulation output.csv.
+Comparative Assessment from Hyperloop simulation output.csv.
+
+Author: Aleksejs Vesjolijs
 
 Outputs
 -------
@@ -40,8 +42,6 @@ Default outputs:
     results_assessment_full.csv
     comparative_analysis_solar_vs_nuclear.csv
     comparative_analysis_solar_vs_fusion.csv
-
-The script is safe to run from a terminal, Jupyter Notebook or IPython.
 """
 
 from __future__ import annotations
